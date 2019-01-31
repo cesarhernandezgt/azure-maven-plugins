@@ -102,6 +102,7 @@ Maven | 3.0 or above
     This maven plugin supports two kinds of configurations V2 and V1 (deprecated). Specify the configuration
     `<schemaVersion>V2</schemaVersion>` to use the V2 configuration. Strongly suggest use v2Schema.
     You can find v1 schema [here](v1-schema.md)
+    
     Property | Required | Description | Version
     ---|---|---|---
     `<region>`* | true | Specifies the region where your Web App will be hosted; the default value is **westus**. All valid regions at [Supported Regions](#region) section. | 0.1.0+
