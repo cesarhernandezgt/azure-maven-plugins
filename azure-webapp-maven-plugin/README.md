@@ -9,7 +9,7 @@
       - [`azure-webapp:deploy`](#azure-webappdeploy)
   - [Configuration Details](#configuration-details)
       - [`<javaVersion>`](#javaversion)
-      - [`<javaWebContainer>` or `<webContainer>`](#javawebcontainer-or-webcontainer)
+      - [`<webContainer>`](#webcontainer)
       - [`<resource>`](#resource)
       - [`<region>`](#region)
       - [`<pricingTier>`](#pricingtier)
@@ -21,7 +21,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.microsoft.azure/azure-webapp-maven-plugin.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.microsoft.azure%22%20AND%20a%3A%22azure-webapp-maven-plugin%22)
 
 The Maven Plugin for Azure App Service provides seamless integration into Maven projects,
-and makes it easier for developers to deploy to different kinds of Azure Web Apps:
+and makes it easier for developers to deploy to different kinds of [Azure Web Apps](https://docs.microsoft.com/en-us/azure/app-service/):
   - [Web App on Linux](https://docs.microsoft.com/azure/app-service-web/app-service-linux-intro)
   - [Web App on Windows](https://docs.microsoft.com/en-us/azure/app-service/app-service-web-overview)
   - [Web App for Containers](https://docs.microsoft.com/en-us/azure/app-service/containers/tutorial-custom-docker-image)
@@ -42,48 +42,42 @@ Maven | 3.0 or above
         $ az login
         $ az account set --subscription <subscription Id>
     ```
-2. Create a new Azure App Service and choose Linux with built-in tomcat as the environment.
-3. To use this plugin in your Maven project, add the following settings for the plugin to your `pom.xml` file:
+2. You could create a new Azure App Service and fill in the information in the `pom.xml`. 
     ```xml
-    <project>
-       ...
-       <packaging>war</packaging>
-       ...
-       <build>
-           <plugins>
-               <plugin>
-                   <groupId>com.microsoft.azure</groupId>
-                   <artifactId>azure-webapp-maven-plugin</artifactId>
-                   <!-- check Maven Central for the latest version -->
-                   <version>1.5.1</version>
-                   <configuration>
-                       <schemaVersion>v2</schemaVersion>
-                       <resourceGroup>your-resource-group</resourceGroup>
-                       <appName>your-app-name</appName>
-                       <region>westus</region>
-                       <pricingTier>P1V2</pricingTier>
-                       <runtime>
-                           <os>linux</os>
-                           <javaVersion>jre8</javaVersion>
-                           <webContainer>tomcat 8.5</webContainer>
-                       </runtime>
-                       <deployment>
-                           <resources>
-                               <resource>
-                                   <directory>${project.basedir}/target</directory>
-                                   <includes>
-                                       <include>*.war</include>
-                                   </includes>
-                               </resource>
-                           </resources>
-                       </deployment>
-                   </configuration>
-               </plugin>
-           </plugins>
-       </build>
-    </project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>azure-webapp-maven-plugin</artifactId>
+                <!-- check Maven Central for the latest version -->
+                <version>1.5.2</version>
+                <configuration>
+                    <schemaVersion>v2</schemaVersion>
+                    <resourceGroup>'your-resource-group'</resourceGroup>
+                    <appName>'your-app-name'</appName>
+                    <region>westeurope</region>
+                    <pricingTier>P1V2</pricingTier>
+                    <runtime>
+                        <os>linux</os>
+                        <javaVersion>jre8</javaVersion>
+                        <webContainer>tomcat 8.5</webContainer>
+                    </runtime>
+                    <deployment>
+                        <resources>
+                            <resource>
+                                <directory>${project.basedir}/target</directory>
+                                <includes>
+                                    <include>*.war</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </deployment>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>      
     ```
-4. Use the following commands to deploy your project to Azure App Service.
+3. Use the following commands to deploy your project to Azure App Service.
     ```
     $ mvn azure-webapp:deploy
     ```
@@ -93,6 +87,16 @@ Maven | 3.0 or above
 
 #### `azure-webapp:config`
 -  A command line tool providing a great experience for managing webapp deploy configuration, it will rewrite your pom config based on your input. Detail about the configuation could be found in the following.
+-  The command line will divide the config into 3 parts. 
+   1. Application
+        
+        You can config appName, resource group, region, pricing tier at this part.
+   2. Runtime
+        
+        You can config operating system and runtime stack at this part. It should be noted that you can not change the operating system after you deploy it.
+   3. DeploymentSlot
+        
+        You can config deployment slot at this part.
 
 #### `azure-webapp:deploy`
 - Deploy artifacts or docker container image to an Azure Web App based on your configuration.<br>If the specified Web App does not exist, it will be created.
@@ -102,13 +106,13 @@ Maven | 3.0 or above
     This maven plugin supports two kinds of configurations V2 and V1 (deprecated). Specify the configuration
     `<schemaVersion>V2</schemaVersion>` to use the V2 configuration. Strongly suggest use v2Schema.
     You can find v1 schema [here](v1-schema.md)
-    
+
     Property | Required | Description | Version
     ---|---|---|---
-    `<region>`* | true | Specifies the region where your Web App will be hosted; the default value is **westus**. All valid regions at [Supported Regions](#region) section. | 0.1.0+
+    [region](#region) | true | Specifies the region where your Web App will be hosted; the default value is **westus**. All valid regions at [Supported Regions](#region) section. | 0.1.0+
     `<resourceGroup>` | true | Azure Resource Group for your Web App. | 0.1.0+
     `<appName>` | true | The name of your Web App. | 0.1.0+
-    `<pricingTier>`* | false | The pricing tier for your Web App. The default value is **P1V2**.| 0.1.0+
+    [pricingTier](#pricingtier) | false | The pricing tier for your Web App. The default value is **P1V2**.| 0.1.0+
     `<deploymentSlot>` | false | The deployment slot to deploy your application. | 1.3.0+
     `<appServicePlanResourceGroup>` | false | The resource group of the existing App Service Plan. If not specified, the value defined in `<resourceGroup>` will be used by default. | 1.0.0+
     `<appServicePlanName>` | false | The name of the existing App Service Plan. | 1.0.0+
@@ -126,19 +130,19 @@ Maven | 3.0 or above
     ```xml
     <configuration>
         ...
-    <runtime>
-        <os>Linux</os>
-        <javaVersion>jre8</javaVersion>
-        <webContainer></webContainer>
-    </runtime>
-        <!-- os -->
-    <runtime>
-        <os>Docker</os>
-        <!-- only image is required -->
-        <image>[hub-user/]repo-name[:tag]</image>
-        <serverId></serverId>
-        <registryUrl></registryUrl>
-    </runtime>
+        <runtime>
+            <os>Linux</os>
+            <javaVersion>jre8</javaVersion>
+            <webContainer></webContainer>
+        </runtime>
+            <!-- os -->
+        <runtime>
+            <os>Docker</os>
+            <!-- only image is required -->
+            <image>[hub-user/]repo-name[:tag]</image>
+            <serverId></serverId>
+            <registryUrl></registryUrl>
+        </runtime>
     </configuration>
     ```
 - Deployment settings
@@ -158,10 +162,7 @@ Maven | 3.0 or above
             <directory>${project.basedir}/target</directory>
             <includes>
                <include>*.jar</include>
-            </includes>
-            <excludes>
-               <exclude>*.xml</exclude>
-            </excludes>
+            </includes>            
           </resource>
          </resources>
         </deployment>
@@ -187,8 +188,21 @@ The supported values for Web App on Windows:
 `1.8.0_92` | Azul's Zulu OpenJDK 8, Update 92
 `1.8.0_102` | Azul's Zulu OpenJDK 8, Update 102
 > Note: It is recommended to ignore the minor version number so that the latest supported JVM will be used in your Web App.
+  
 
-#### `<javaWebContainer>` or `<webContainer>`
+#### `<webContainer>`
+
+The supported Value for web App on Linux
+
+Supported Value | Description
+---|---
+`tomcat 8.5` | Newest Tomcat 8.5
+`tomcat 9.0` | Tomcat 9.0
+`wildfly 14` | WildFly 14 
+  
+
+The supported Value for web App on windows
+
 Supported Value | Description
 ---|---
 `tomcat 7.0` | Newest Tomcat 7.0
@@ -202,7 +216,6 @@ Supported Value | Description
 `jetty 9.1.0.20131115` | Jetty 9.1.0.v20131115
 `jetty 9.3` | Newest Jetty 9.3
 `jetty 9.3.13.20161014` | Jetty 9.3.13.v20161014
-`wildfly 14` | WildFly 14
 > Note: It is recommended to ignore the minor version number so that the latest supported web container will be used in your Web App.
 
 #### `<resource>`
@@ -217,49 +230,18 @@ Property | Description
 `/site/wwwroot/webapps` when you deploy the war package.
 
 #### `<region>`
-All valid regions are listed as below. Read more at [Azure Region Availability](https://azure.microsoft.com/en-us/regions/services/).
-- `westus`
-- `westus2`
-- `centralus`
-- `eastus`
-- `eastus2`
-- `northcentralus`
-- `southcentralus`
-- `westcentralus`
-- `canadacentral`
-- `canadaeast`
-- `brazilsouth`
-- `northeurope`
-- `westeurope`
-- `uksouth`
-- `ukwest`
-- `eastasia`
-- `southeastasia`
-- `japaneast`
-- `japanwest`
-- `australiaeast`
-- `australiasoutheast`
-- `centralindia`
-- `southindia`
-- `westindia`
-- `koreacentral`
-- `koreasouth`
+Some valid regions are listed as below. All valid regions pelease refer to [Azure Region Availability](https://azure.microsoft.com/en-us/global-infrastructure/services/?regions=all&products=app-service).
+- `West US`
+- `West US 2`
+- `East Asia`
+
 
 #### `<pricingTier>`
-All valid pricing tiers are listed as below. Read more at [Azure App Service Plan Pricing](https://azure.microsoft.com/en-us/pricing/details/app-service/).
+Some valid pricing tiers are listed as below. All valid pricing tiers please refer to [Azure App Service Plan Pricing](https://azure.microsoft.com/en-us/pricing/details/app-service/).
 - `F1`
-- `D1`
-- `B1`
-- `B2`
-- `B3`
-- `S1`
-- `S2`
-- `S3`
 - `P1V2`
 - `P2V2`
-- `P3V2`
 
-<a name="samples"></a>
 ## Samples
 A few typical usages of Maven Plugin for Azure App Service Web Apps are listed at [Web App Samples](../docs/web-app-samples.md). You can choose one to quickly get started.
 
